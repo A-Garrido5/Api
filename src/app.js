@@ -12,9 +12,20 @@ var request = require('request'); // "Request" library
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
 var client_secret = '2b69ce3f0d3643d0a65f8537c490e775'; // Your secret
 
+
+var SpotifyWebApi = require('spotify-web-api-node');
+
+// credentials are optional
+var spotifyApi = new SpotifyWebApi({
+  clientId: '3ce9a417f2094431888205c85f2e61a8',
+  clientSecret: '2b69ce3f0d3643d0a65f8537c490e775',
+  redirectUri: 'http://www.example.com/callback'
+});
+
 // your application requests authorization
 var authOptions = {
   url: 'https://accounts.spotify.com/api/token',
+  //url: 'https://accounts.spotify.com/authorize ',
   headers: {
     'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
   },
@@ -25,21 +36,21 @@ var authOptions = {
 };
 
 request.post(authOptions, function(error, response, body) {
+
   if (!error && response.statusCode === 200) {
 
     // use the access token to access the Spotify Web API
     var token = body.access_token;
-    console.log(token);
-    /*
-    var options = {
-      url: 'https://api.spotify.com/v1/users/jmperezperez',
-      headers: {
-        'Authorization': 'Bearer ' + token
+    spotifyApi.setAccessToken(token);
+
+    spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE').then(
+      function(data) {
+        console.log('Artist albums', data.body);
       },
-      json: true
-    };
-    request.get(options, function(error, response, body) {
-      console.log(body);
-    });*/
+      function(err) {
+        console.error(err);
+      }
+    );
+  
   }
 });
