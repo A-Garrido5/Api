@@ -12,6 +12,8 @@ const express = require('express');
 const app = express();
 const morgan=require('morgan');
 
+require("./database")
+
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
 var client_secret = '2b69ce3f0d3643d0a65f8537c490e775'; // Your secret
 
