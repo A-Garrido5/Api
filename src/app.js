@@ -13,6 +13,10 @@ const app = express();
 const morgan=require('morgan');
 var mongoose=require('mongoose');
 
+const cors = require('cors');
+app.use(cors());
+app.options('*', cors());
+
 var Model= require('./model');
 
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
@@ -89,7 +93,7 @@ request.post(authOptions, function(error, response, body) {
 });
 
 
-app.get('/getAlbums', (req, res) => {
+app.get('/getAllAlbums', (req, res) => {
   
   var Album = Model.albumTable;
 
