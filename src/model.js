@@ -1,5 +1,5 @@
 var mongoose=require('mongoose');
-var db = require('../database');
+var db = require('./database');
 
 // create an schema
 var albumSchema = new mongoose.Schema({
@@ -20,35 +20,28 @@ var albumSchema = new mongoose.Schema({
             release_date_precision: String,
             total_tracks: Number,
             type: String,
-            uri: String
+            uri: String,
+            fav:{
+                type: Boolean,
+                default: false
+            }
         });
+        
+        var favoriteSchema = new mongoose.Schema({
+            id : {
+                type: String,
+                required: true,
+                unique: true
+            }
 
+        });
+        
 albumTable=mongoose.model('album',albumSchema);
+favoriteTable= mongoose.model('favorite',favoriteSchema);
         
 module.exports={
     albumTable,
-     createData: async function(inputData, callback){
-                  
-        albumData= await new albumTable(inputData);
-        
-        albumData.save(function(err, data){
-          if (err) throw err;
-           return callback(data);
-        });
-        
-     },
+    favoriteTable
 
-     getData:function(){
-
-        const Album = mongoose.model('albums', albumSchema);
-          
-          const all = Album.find();
-        
-          console.log(all);
-
-        
-        //console.log(movies);
-
-
-     }
+   
 }

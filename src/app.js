@@ -13,7 +13,7 @@ const app = express();
 const morgan=require('morgan');
 var mongoose=require('mongoose');
 
-var insertModel= require('./models/insert-model');
+var Model= require('./model');
 
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
 var client_secret = '2b69ce3f0d3643d0a65f8537c490e775'; // Your secret
@@ -65,13 +65,18 @@ request.post(authOptions, function(error, response, body) {
 
     spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE').then(
       function(data) {
-        //console.log('Artist albums', data.body);
         
         data.body.items.forEach(function(element) 
-        { 
-          insertModel.createData(element, function(data){
-            console.log("row created")
-         });
+        {          
+
+          albumData= new albumTable(element);
+        
+          albumData.save(function(err, data){
+              if (err) throw err;
+              
+          });
+
+
         });
         
       },
@@ -86,10 +91,9 @@ request.post(authOptions, function(error, response, body) {
 
 app.get('/getAlbums', (req, res) => {
   
-  var Blog = insertModel.albumTable;
+  var Album = Model.albumTable;
 
-  Blog.find().then((result)=>{
-    console.log("asdasdasd")
+  Album.find().then((result)=>{
 		res.send(result);
 	}).catch((err) =>{
 		console.log(err);
@@ -98,6 +102,55 @@ app.get('/getAlbums', (req, res) => {
 
 })
 
+app.get('/getAllFavorites', (req, res) => {
+  
+  var Favorites = Model.favoriteTable;
+
+  Favorites.find().then((result)=>{
+		res.send(result);
+	}).catch((err) =>{
+		console.log(err);
+	})
+  
+
+})
+
+app.post('/updateAlbum', (req, res) => {
+  
+  var Album = Model.albumTable;
+
+  Album.findByIdAndUpdate({ _id: req.body._id }, req.body, (err, doc) => {
+    
+    res.send(doc)
+    
+  });
+  
+
+})
+
+app.post('/addToFavorites', (req, res) => {
+  
+  albumData= new favoriteTable(req.body);
+        
+    albumData.save(function(err, data){
+        console.error(err);
+        res.send(data)
+        
+    });
+
+})
+
+app.post('/removeFromFavorites', (req, res) => {
+  
+  var Album = Model.favoriteTable;
+        
+  Album.deleteOne({ id: req.body.id }, req.body, (err, doc) => {
+    
+    res.send(doc)
+    
+  });
+
+})
 
 
 
