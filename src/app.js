@@ -11,14 +11,20 @@ var request = require('request'); // "Request" library
 const express = require('express');
 const app = express();
 const morgan=require('morgan');
+var mongoose=require('mongoose');
+var db = require("./database")
+var insertModel= require('./models/insert-model');
 
-require("./database")
+//var db = require('../database');
+//require("./routes/app.routes")
+//require('./models/Album')
 
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
 var client_secret = '2b69ce3f0d3643d0a65f8537c490e775'; // Your secret
 
 
 var SpotifyWebApi = require('spotify-web-api-node');
+const { default: Album } = require('./models/Album');
 
 //Configuraciones
 app.set('port', process.env.PORT || 3000);
@@ -54,29 +60,40 @@ app.listen(app.get('port'),()=>{
   console.log(`Server listening on port ${app.get('port')}`);
 });
 
+request.post(authOptions, function(error, response, body) {
+
+  if (!error && response.statusCode === 200) {
+
+    // use the access token to access the Spotify Web API
+    var token = body.access_token;
+    spotifyApi.setAccessToken(token);
+
+    spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE').then(
+      function(data) {
+        //console.log('Artist albums', data.body);
+        
+        data.body.items.forEach(function(element) 
+        { 
+          //const album = Album(element) 
+//            console.log(element) 
+          insertModel.createData(element, function(data){
+            console.log(" record was created");
+         });
+        });
+        //res.json(data.body);
+      },
+      function(err) {
+        console.error(err);
+      }
+    );
+  
+  }
+});
+
 
 app.get('/', (req, res) => {
   
-  request.post(authOptions, function(error, response, body) {
-
-    if (!error && response.statusCode === 200) {
   
-      // use the access token to access the Spotify Web API
-      var token = body.access_token;
-      spotifyApi.setAccessToken(token);
-  
-      spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE').then(
-        function(data) {
-          //console.log('Artist albums', data.body);
-          res.json(data.body);
-        },
-        function(err) {
-          console.error(err);
-        }
-      );
-    
-    }
-  });
   
 
 })
