@@ -12,19 +12,14 @@ const express = require('express');
 const app = express();
 const morgan=require('morgan');
 var mongoose=require('mongoose');
-var db = require("./database")
-var insertModel= require('./models/insert-model');
 
-//var db = require('../database');
-//require("./routes/app.routes")
-//require('./models/Album')
+var insertModel= require('./models/insert-model');
 
 var client_id = '3ce9a417f2094431888205c85f2e61a8'; // Your client id
 var client_secret = '2b69ce3f0d3643d0a65f8537c490e775'; // Your secret
 
 
 var SpotifyWebApi = require('spotify-web-api-node');
-const { default: Album } = require('./models/Album');
 
 //Configuraciones
 app.set('port', process.env.PORT || 3000);
@@ -74,13 +69,11 @@ request.post(authOptions, function(error, response, body) {
         
         data.body.items.forEach(function(element) 
         { 
-          //const album = Album(element) 
-//            console.log(element) 
           insertModel.createData(element, function(data){
-            console.log(" record was created");
+            console.log("row created")
          });
         });
-        //res.json(data.body);
+        
       },
       function(err) {
         console.error(err);
@@ -91,12 +84,20 @@ request.post(authOptions, function(error, response, body) {
 });
 
 
-app.get('/', (req, res) => {
+app.get('/getAlbums', (req, res) => {
   
-  
+  var Blog = insertModel.albumTable;
+
+  Blog.find().then((result)=>{
+    console.log("asdasdasd")
+		res.send(result);
+	}).catch((err) =>{
+		console.log(err);
+	})
   
 
 })
+
 
 
 

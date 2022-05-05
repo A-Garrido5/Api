@@ -6,10 +6,16 @@ const mongoose = require('mongoose');
     useNewUrlParser : true,
     useUnifiedTopology : true
   })
-      .then(db => console.log('Db is connected to ', db.connection.host))
+      .then(db => {
+        console.log('Db is connected to ', db.connection.host);
+        
+        db.connection.dropDatabase();
+
+
+      })
       .catch(err => console.error(err))
 
-
+      
   //await MyModel.create({ name: 'Val' }, { name: 'Varun' });
   module.exports = db;
 

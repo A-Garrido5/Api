@@ -26,14 +26,29 @@ var albumSchema = new mongoose.Schema({
 albumTable=mongoose.model('album',albumSchema);
         
 module.exports={
-     createData:function(inputData, callback){
+    albumTable,
+     createData: async function(inputData, callback){
                   
-        albumData= new albumTable(inputData);
+        albumData= await new albumTable(inputData);
         
         albumData.save(function(err, data){
-            console.log(data);
           if (err) throw err;
            return callback(data);
         });
+        
+     },
+
+     getData:function(){
+
+        const Album = mongoose.model('albums', albumSchema);
+          
+          const all = Album.find();
+        
+          console.log(all);
+
+        
+        //console.log(movies);
+
+
      }
 }
