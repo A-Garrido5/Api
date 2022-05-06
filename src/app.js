@@ -54,6 +54,8 @@ var authOptions = {
   json: true
 };
 
+var token;
+
 //Iniciando el servidor
 app.listen(app.get('port'),()=>{
   console.log(`Server listening on port ${app.get('port')}`);
@@ -64,9 +66,14 @@ request.post(authOptions, function(error, response, body) {
   if (!error && response.statusCode === 200) {
 
     // use the access token to access the Spotify Web API
-    var token = body.access_token;
+    token = body.access_token;
     spotifyApi.setAccessToken(token);
 
+    
+   
+
+ 
+    /*
     spotifyApi.getArtistAlbums('43ZHCT0cAZBISjO8DG9PnE').then(
       function(data) {
         
@@ -87,7 +94,7 @@ request.post(authOptions, function(error, response, body) {
       function(err) {
         console.error(err);
       }
-    );
+    );*/
   
   }
 });
@@ -123,8 +130,8 @@ app.post('/updateAlbum', (req, res) => {
   
   var Album = Model.albumTable;
 
-  Album.findByIdAndUpdate({ _id: req.body._id }, req.body, (err, doc) => {
-    
+  Album.update({ id: req.body.id }, req.body, (err, doc) => {
+    console.log(doc)
     res.send(doc)
     
   });
@@ -158,3 +165,60 @@ app.post('/removeFromFavorites', (req, res) => {
 
 
 
+app.get('/search', async (req, res) => {
+  var respuesta = [];
+  var Album = Model.albumTable;
+
+  var options = {
+    url: 'https://api.spotify.com/v1/search?type=album&include_external=audio&q='+req.query.q,
+    headers: {
+      'Authorization': 'Bearer ' + token
+    },
+    json: true
+  };
+  request.get(options, async (error, response, body) => {
+
+    
+    const respuesta = await Promise.all(
+     body.albums.items.map(async(element) => {
+      
+
+      const exe = await Album.find({id: element.id}).then(async (result)=>{
+        if(result.length==0){
+        
+          albumData= new albumTable(element);
+        
+          return await albumData.save( async (data) =>{
+            
+            element.fav = false;
+            return element;
+                      
+              
+          });
+        }
+        else{
+          
+          element.fav = result[0].fav;
+          return element;
+
+          
+        }
+
+
+      });
+      
+      return exe;
+    }));
+    
+    console.log(respuesta)
+    res.send(respuesta)
+
+   
+    
+    
+  });
+
+
+  
+
+})
